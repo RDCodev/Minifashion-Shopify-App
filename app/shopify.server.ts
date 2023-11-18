@@ -24,6 +24,10 @@ const shopify = shopifyApp({
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks",
     },
+    ORDERS_CREATE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
+    }
   },
   hooks: {
     afterAuth: async ({ session }) => {
