@@ -2,27 +2,19 @@
 
 name = "minifashion-app"
 client_id = "f8bdf8ae3030c5594f19af505674433b"
-application_url = "https://golf-inn-recommends-tried.trycloudflare.com"
+application_url = "https://epinions-molecules-picking-electro.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = [
-  "write_products", 
-  "read_customers",
-  "read_inventory",
-  "read_orders",
-  "read_products",
-  "read_users",
-  "read_all_orders"
-]
+scopes = "write_products,read_customers,read_inventory,read_orders,read_products"
 
 [auth]
 redirect_urls = [
-  "https://golf-inn-recommends-tried.trycloudflare.com/auth/callback",
-  "https://golf-inn-recommends-tried.trycloudflare.com/auth/shopify/callback",
-  "https://golf-inn-recommends-tried.trycloudflare.com/api/auth/callback",
-  "https://golf-inn-recommends-tried.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://epinions-molecules-picking-electro.trycloudflare.com/auth/callback",
+  "https://epinions-molecules-picking-electro.trycloudflare.com/auth/shopify/callback",
+  "https://epinions-molecules-picking-electro.trycloudflare.com/api/auth/callback",
+  "https://epinions-molecules-picking-electro.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

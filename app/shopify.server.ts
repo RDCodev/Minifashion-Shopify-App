@@ -23,8 +23,24 @@ const shopify = shopifyApp({
     APP_UNINSTALLED: {
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks",
+    },  
+    CUSTOMERS_DATA_REQUEST: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/webhooks",
+    },
+    CUSTOMERS_REDACT: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/webhooks",
+    },
+    PRODUCTS_CREATE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
     },
     ORDERS_CREATE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
+    },
+    CUSTOMERS_CREATE: {
       deliveryMethod: DeliveryMethod.EventBridge,
       arn: process.env.AWS_ARN_SOURCE_EVENT || ""
     }
