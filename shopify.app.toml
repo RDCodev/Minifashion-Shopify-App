@@ -1,20 +1,20 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "minifashion-app"
+name = "Recommend Me!"
 client_id = "f8bdf8ae3030c5594f19af505674433b"
-application_url = "https://epinions-molecules-picking-electro.trycloudflare.com"
+application_url = "https://dinner-belt-would-yeast.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_customers,read_inventory,read_orders,read_products"
+scopes = "read_customers,read_inventory,read_orders,read_products,read_all_orders"
 
 [auth]
 redirect_urls = [
-  "https://epinions-molecules-picking-electro.trycloudflare.com/auth/callback",
-  "https://epinions-molecules-picking-electro.trycloudflare.com/auth/shopify/callback",
-  "https://epinions-molecules-picking-electro.trycloudflare.com/api/auth/callback",
-  "https://epinions-molecules-picking-electro.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://dinner-belt-would-yeast.trycloudflare.com/auth/callback",
+  "https://dinner-belt-would-yeast.trycloudflare.com/auth/shopify/callback",
+  "https://dinner-belt-would-yeast.trycloudflare.com/api/auth/callback",
+  "https://dinner-belt-would-yeast.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]
