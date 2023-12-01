@@ -1,0 +1,1 @@
+export const SHOPIFY_APP_ID = 1354745
