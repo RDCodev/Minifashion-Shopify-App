@@ -8,7 +8,10 @@ export interface CustomerProduct {
 
 export interface Customer {
   name: string;
-  products: CustomerProduct[];
+  customer_id: any;
+  email: string;
+  marketing_state: boolean | number;
+  products?: CustomerProduct[];
 }
 
 export interface CustomerList {

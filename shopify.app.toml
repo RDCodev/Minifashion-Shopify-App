@@ -2,19 +2,19 @@
 
 name = "Recommend Me!"
 client_id = "f8bdf8ae3030c5594f19af505674433b"
-application_url = "https://memorial-stockings-poison-peru.trycloudflare.com"
+application_url = "https://voluntary-enormous-geographical-tier.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_inventory,read_orders,read_products,read_all_orders"
+scopes = "read_customers,read_inventory,read_orders,read_products,read_all_orders, read_product_listings"
 
 [auth]
 redirect_urls = [
-  "https://memorial-stockings-poison-peru.trycloudflare.com/auth/callback",
-  "https://memorial-stockings-poison-peru.trycloudflare.com/auth/shopify/callback",
-  "https://memorial-stockings-poison-peru.trycloudflare.com/api/auth/callback",
-  "https://memorial-stockings-poison-peru.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://voluntary-enormous-geographical-tier.trycloudflare.com/auth/callback",
+  "https://voluntary-enormous-geographical-tier.trycloudflare.com/auth/shopify/callback",
+  "https://voluntary-enormous-geographical-tier.trycloudflare.com/api/auth/callback",
+  "https://voluntary-enormous-geographical-tier.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

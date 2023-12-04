@@ -1,11 +1,12 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import type { IndexTableProps } from "@shopify/polaris";
 import { Card, EmptySearchResult, Frame, IndexTable, Modal, Page, Text, TextContainer } from "@shopify/polaris";
 import { Fragment, useCallback, useState } from "react";
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
 import { AWS_ENDPOINTS } from "~/utils/api.aws";
 import { SHOPIFY_APP_ID } from "~/utils/app.shopify";
+import { capatilize } from "~/utils/app.utils";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 
@@ -16,7 +17,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ customers });
 };
 
+
 export default function RecommendPage() {
+
+  const navigate = useNavigate();
+  const [active, setActive] = useState(false);
+  const handleChange = useCallback(() => setActive(!active), [active]);
+
   const { customers } = useLoaderData<typeof loader>()
   const rows = customers || []
 
@@ -27,6 +34,7 @@ export default function RecommendPage() {
     { title: 'Type' },
     { title: 'Tags' },
   ];
+
   const emptyStateMarkup = (
     <EmptySearchResult
       title={'No customers yet'}
@@ -34,26 +42,20 @@ export default function RecommendPage() {
       withIllustration
     />
   );
+
   const resourceName = {
     singular: 'customer',
     plural: 'customers',
   };
 
-  const [active, setActive] = useState(true);
-  const handleChange = useCallback(() => setActive(!active), [active]);
-
-  const capatilize = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  }
-
   const modalRecommend = () => {
     return (
-      <div style={{height: '0px'}}>
+      <div style={{ height: '0px' }}>
         <Frame>
           <Modal
             open={active}
             onClose={handleChange}
-            title="Reach more shoppers with Instagram product tags"
+            title="Products Recommendatons by Costumer"
             primaryAction={{
               content: 'Add Instagram',
               onAction: handleChange,
@@ -142,10 +144,20 @@ export default function RecommendPage() {
         fullWidth
         title="Dashboard"
         subtitle="Recommend products to your customers"
-        primaryAction={{
-          content: 'Recommend',
-          onAction: () => { handleChange() }
-        }}
+        actionGroups={[
+          {
+            title: 'Recommend',
+            actions: [
+              {
+                content: 'Products',
+                onAction: handleChange,
+              }, {
+                content: 'Promotions',
+                onAction: () => navigate('/app/emails'),
+              }
+            ],
+          }
+        ]}
       >
         <Card>
           <IndexTable
@@ -154,7 +166,6 @@ export default function RecommendPage() {
             itemCount={customers.length}
             emptyState={emptyStateMarkup}
             headings={columnHeadings as IndexTableProps['headings']}
-
           >
             {rowMarkup}
           </IndexTable>
