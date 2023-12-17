@@ -2,19 +2,19 @@
 
 name = "Recommend Me!"
 client_id = "f8bdf8ae3030c5594f19af505674433b"
-application_url = "https://voluntary-enormous-geographical-tier.trycloudflare.com"
+application_url = "https://microsoft-booth-duty-upgrades.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_inventory,read_orders,read_products,read_all_orders, read_product_listings"
+scopes = "read_customers,read_inventory,read_orders,read_products,read_all_orders,read_product_listings"
 
 [auth]
 redirect_urls = [
-  "https://voluntary-enormous-geographical-tier.trycloudflare.com/auth/callback",
-  "https://voluntary-enormous-geographical-tier.trycloudflare.com/auth/shopify/callback",
-  "https://voluntary-enormous-geographical-tier.trycloudflare.com/api/auth/callback",
-  "https://voluntary-enormous-geographical-tier.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://microsoft-booth-duty-upgrades.trycloudflare.com/auth/callback",
+  "https://microsoft-booth-duty-upgrades.trycloudflare.com/auth/shopify/callback",
+  "https://microsoft-booth-duty-upgrades.trycloudflare.com/api/auth/callback",
+  "https://microsoft-booth-duty-upgrades.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]
