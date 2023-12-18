@@ -14,7 +14,7 @@ import type { Customer, CustomerProduct } from "~/interfaces/api.aws.interfaces"
 import { capatilize } from "~/utils/app.utils";
 import { retrieveCommonObjectByFields } from "../functions/emails.functions";
 
-export default function EmailsCustomers({ customers, products, wrapperState }: { customers: any, products: any, wrapperState: any }) {
+export default function EmailsCustomers({ customers, products, wrapperState, wrapperStateEmails }: any) {
 
   const [customer, setCustomer] = useState<any>({ name: '', email: '', marketing_state: false, common_products: [], favorite_vendors: [] })
   const deselectedOptions = useMemo(
@@ -26,7 +26,7 @@ export default function EmailsCustomers({ customers, products, wrapperState }: {
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState(deselectedOptions);
 
-  const updateCustomer = (customer_name: string, customers: Customer[]): any => {
+  const updateCustomer = useCallback((customer_name: string, customers: Customer[]): any => {
     const customer = customers.filter((customer) => customer.name === customer_name)
     const { products, ...props } = customer[0]
 
@@ -38,8 +38,16 @@ export default function EmailsCustomers({ customers, products, wrapperState }: {
       return product.vendor
     }))]
 
+    const customerDeliverEmail = {
+      name: props.name,
+      email: props.email,
+      isMarketing: props.marketing_state
+    }
+
+    wrapperStateEmails(customerDeliverEmail)
+
     return { ...props, common_products, favorite_vendors }
-  }
+  }, [wrapperStateEmails])
 
   const updateText = useCallback(
     (value: string) => {
@@ -76,7 +84,7 @@ export default function EmailsCustomers({ customers, products, wrapperState }: {
       wrapperState(retrieveCommonObjectByFields(products, 10, [...common_products, ...favorite_vendors]))
       setInputValue(selectedValue[0] || '');
     },
-    [options, customers, products, wrapperState],
+    [options, customers, products, wrapperState, updateCustomer],
   );
 
   const textField = (

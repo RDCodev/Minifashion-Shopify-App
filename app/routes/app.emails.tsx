@@ -10,7 +10,7 @@ import { type ActionFunctionArgs, json, type LoaderFunctionArgs } from "@remix-r
 import { authenticate } from "~/shopify.server";
 import { AWS_ENDPOINTS } from "~/utils/api.aws";
 import { SHOPIFY_APP_ID } from "~/utils/app.shopify";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
 import EmailsCustomers from "./emails.builder/components/emails.customers";
 import EmailsProducts from "./emails.builder/components/emails.products";
@@ -29,7 +29,7 @@ const grahpqlQueries = [
       query {
         products(first: ${limit}) {
           edges {
-            node { 
+            node {
               id
               title
               vendor
@@ -46,7 +46,7 @@ const grahpqlQueries = [
             }
           }
         }
-      } 
+      }
     `
   }
 ]
@@ -79,14 +79,23 @@ export default function EmailsPage() {
   const [active, setActive] = useState(false)
   const [recommendProducts, setRecommendProducts] = useState<any[]>([])
   const [offerProducts, setOfferProducts] = useState([])
+  const [customerEmails, setCustomerEmails] = useState([])
 
   const wrapperSetRecommendProducts = useCallback((state: any) => {
     setRecommendProducts(state)
   }, [setRecommendProducts])
 
-  const wrapeerSetOfferProducts = useCallback((state: any) => {
+  const wrapperSetOfferProducts = useCallback((state: any) => {
     setOfferProducts(state)
   }, [setOfferProducts])
+
+  const wrapperSetCustomerEmails = useCallback((state: any) => {
+    setCustomerEmails(state)
+  }, [setCustomerEmails])
+
+  const wrapperSetActiveModal = useCallback((state: any) => {
+    setActive(state)
+  },[setActive])
 
   const handleChange = useCallback(() => setActive(!active), [active])
 
@@ -100,11 +109,11 @@ export default function EmailsPage() {
             title='Template Email Information'
           >
             <Modal.Section>
-              <Form method="post">
-                <EmailsBuilder
-                  offerProducts={offerProducts}
-                />
-              </Form>
+              <EmailsBuilder
+                emails= {customerEmails}
+                offerProducts={offerProducts}
+                wrapperState={wrapperSetActiveModal}
+              />
             </Modal.Section>
           </Modal>
         </Frame>
@@ -124,7 +133,7 @@ export default function EmailsPage() {
                 <BlockStack gap="200">
                   <EmailsProducts
                     recommendations={recommendProducts}
-                    wrapperState={wrapeerSetOfferProducts}
+                    wrapperState={wrapperSetOfferProducts}
                   />
                 </BlockStack>
               </Layout.Section>
@@ -138,6 +147,7 @@ export default function EmailsPage() {
                     customers={customers}
                     products={savedProducts}
                     wrapperState={wrapperSetRecommendProducts}
+                    wrapperStateEmails={wrapperSetCustomerEmails}
                   />
                 </BlockStack>
               </Layout.Section>
