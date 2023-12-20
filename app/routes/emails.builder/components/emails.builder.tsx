@@ -36,7 +36,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { ema
 
     if (!discount) throw new Error(`Discount can't be zero, please change the amount.`)
 
-    return productPrice - (productPrice * (discount / 100))
+    return (productPrice - (productPrice * (discount / 100))).toFixed(2)
   }
 
   const handleSubmit = useCallback( async (event: any) => {
@@ -49,10 +49,10 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { ema
       products: offerProducts.reduce((arr: any[], { value, price, url }: any) => {
 
         const productOffer = {
-          Title_Product_A: value,
-          Previous_Price_Product_A: price,
-          Current_Price_Product_A: calculateDiscountProduct(Number(discount), Number(price)),
-          Product_Image_Url: url.url
+          title_product: value,
+          previous_price_product: price,
+          current_price_product: calculateDiscountProduct(Number(discount), Number(price)),
+          product_image_url: url.url
         }
 
         return [...arr, productOffer]
@@ -96,7 +96,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { ema
       action: 'apps/aws/emails'
     }) */
 
-  }, [collection, discount, body, offerProducts, template, wrapperState])
+  }, [emails.name, emails.email, collection, discount, body, offerProducts, template, wrapperState])
 
   const toggleActive = useCallback(() => setActivate((active) => !active), []);
 
