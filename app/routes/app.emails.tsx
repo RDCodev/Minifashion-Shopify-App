@@ -4,6 +4,7 @@ import {
   BlockStack,
   Frame,
   Modal,
+  Toast,
 } from "@shopify/polaris";
 import { useCallback, useState } from "react";
 import { type ActionFunctionArgs, json, type LoaderFunctionArgs } from "@remix-run/node";
@@ -76,6 +77,7 @@ export default function EmailsPage() {
 
   const { customers, savedProducts } = useLoaderData<typeof loader>()
 
+  const [activate, setActivate] = useState(false)
   const [active, setActive] = useState(false)
   const [recommendProducts, setRecommendProducts] = useState<any[]>([])
   const [offerProducts, setOfferProducts] = useState([])
@@ -98,6 +100,11 @@ export default function EmailsPage() {
   },[setActive])
 
   const handleChange = useCallback(() => setActive(!active), [active])
+  const toggleActive = useCallback(() => setActivate((active) => !active), []);
+
+  const toastMarkup = activate ? (
+    <Toast content='Email Deliver' onDismiss={toggleActive} />
+  ) : null;
 
   return (
     <>
@@ -113,6 +120,7 @@ export default function EmailsPage() {
                 emails= {customerEmails}
                 offerProducts={offerProducts}
                 wrapperState={wrapperSetActiveModal}
+                onSend={toggleActive}
               />
             </Modal.Section>
           </Modal>
@@ -155,6 +163,9 @@ export default function EmailsPage() {
           </Layout.Section>
         </Layout>
       </Page>
+      <Frame>
+        {toastMarkup}
+      </Frame>
     </>
   )
 }

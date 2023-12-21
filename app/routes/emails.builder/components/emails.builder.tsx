@@ -8,16 +8,14 @@ import {
   BlockStack,
   Form,
   Text,
-  Toast
 } from "@shopify/polaris"
 import { forwardRef, useCallback, useState } from "react"
 import { AWS_ENDPOINTS, emailTemplateConfig } from "~/utils/api.aws"
 
-const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { emails: any, offerProducts: any[], wrapperState: any }, ref) => {
+const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend }: { emails: any, offerProducts: any[], wrapperState: any, onSend: any }, ref) => {
 
   //const deliverEmails = useFetcher()
 
-  const [activate, setActivate] = useState(false)
   const [deliver, setDeliver] = useState(false)
   const [template, setTemplate] = useState({ ...emailTemplateConfig })
   const [collection, setCollection] = useState("")
@@ -81,7 +79,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { ema
         mode: 'no-cors'
       })
 
-      setActivate(true)
+      onSend(true)
     } catch (error) {
 
     } finally {
@@ -96,13 +94,8 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { ema
       action: 'apps/aws/emails'
     }) */
 
-  }, [emails.name, emails.email, collection, discount, body, offerProducts, template, wrapperState])
+  }, [emails.name, emails.email, collection, discount, body, offerProducts, template, onSend, wrapperState])
 
-  const toggleActive = useCallback(() => setActivate((active) => !active), []);
-
-  const toastMarkup = activate ? (
-    <Toast content='Email Deliver' onDismiss={toggleActive} />
-  ) : null;
 
   return (
     <>
@@ -142,7 +135,6 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState }: { ema
           <Button variant="primary" submit loading={deliver}>Submit</Button>
         </FormLayout>
       </Form>
-        {toastMarkup}
     </>
   )
 })
