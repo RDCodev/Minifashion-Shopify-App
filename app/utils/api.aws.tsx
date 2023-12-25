@@ -3,7 +3,8 @@ const URL_AWS_REST = "https://p57o0cbin9.execute-api.us-east-2.amazonaws.com/MF-
 
 export const AWS_ENDPOINTS: any = {
   customersList: (appID: number) => `${URL_AWS}/recommend/customer/list?app_id=${appID}`,
-  deliverEmails: () => `${URL_AWS_REST}/emails`
+  deliverEmails: () => `${URL_AWS_REST}/emails`,
+  emailsMetrics: () => `${URL_AWS_REST}/emails/metrics`
 }
 
 export const emailTemplateConfig: any = {

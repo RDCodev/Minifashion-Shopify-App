@@ -1,50 +1,72 @@
 import * as d3 from "d3";
-import { useState } from "react";
+
+interface EmailMetric {
+  date: Date,
+  opened: number,
+  clicked: number,
+  deliver: number
+}
 
 export default function LinePlotEmailMetrics({
+  dataset,
   width = 640,
   height = 400,
   marginTop = 20,
   marginRight = 20,
   marginBottom = 20,
   marginLeft = 20
-}: any) {
+}: {
+  dataset: EmailMetric[],
+  width?: number,
+  height?: number,
+  marginTop?: number,
+  marginRight?: number,
+  marginBottom?: number,
+  marginLeft?: number
+}) {
 
-  const [data, setData] = useState<any[]>(() => d3.ticks(-2, 2, 200).map(Math.sin));
+  const data: EmailMetric[] = dataset.reduce((arr: any[], d: any) => {
+    return [
+      ...arr,
+      {
+        ...d,
+        date: new Date(d.date)
+      }
+    ]
+  }, [])
 
-  function onMouseMove(event: any) {
-    const [x, y] = d3.pointer(event);
-    setData(data.slice(-200).concat(Math.atan2(x, y)));
-  }
+  const x = d3.scaleTime(
+    d3.extent(data, d => d.date),
+    [marginLeft, width - marginRight])
 
-  const x = d3.scaleLinear([0, data.length - 1], [marginLeft, width - marginRight]);
-  const y = d3.scaleLinear(d3.extent(data), [height - marginBottom, marginTop]);
-  const line = d3.line((d, i) => x(i), y);
+  const y = d3.scaleLinear(
+    [0, d3.max(data, d => d.deliver)],
+    [height - marginBottom, marginTop])
+
+
 
   return (
     <>
-      <div onMouseMove={onMouseMove}>
-        <svg
-          width={width}
-          height={height}>
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            d={line(data)} />
-          <g
-            fill="white"
-            stroke="currentColor"
-            stroke-width="1.5">
-            {
-              data.map((d: any, i: any) => (
-                <circle key={i} cx={x(i)} cy={y(d)} r="2.5" />
-              ))
-            }
-          </g>
-        </svg>
-      </div>
-
+      <svg
+        width={width}
+        height={height}>
+        
+        {/* <path
+          fill="none"
+          stroke="steelblue"
+          strokeWidth="1.5"
+          d={line(data)} />
+        <g
+          fill="green"
+          stroke="currentColor"
+          strokeWidth="1.5">
+          {
+            data.map((d: any, i: any) => (
+              <circle key={i} cx={x(i)} cy={y(d)} r="2.5" />
+            ))
+          }
+        </g> */}
+      </svg>
     </>
   )
 }
