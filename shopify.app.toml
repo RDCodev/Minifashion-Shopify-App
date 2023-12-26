@@ -2,7 +2,7 @@
 
 name = "Recommend Me!"
 client_id = "f8bdf8ae3030c5594f19af505674433b"
-application_url = "https://processes-estates-convert-toe.trycloudflare.com"
+application_url = "https://largest-renewable-zealand-mia.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "read_customers,read_inventory,read_orders,read_products,read_all_order
 
 [auth]
 redirect_urls = [
-  "https://processes-estates-convert-toe.trycloudflare.com/auth/callback",
-  "https://processes-estates-convert-toe.trycloudflare.com/auth/shopify/callback",
-  "https://processes-estates-convert-toe.trycloudflare.com/api/auth/callback",
-  "https://processes-estates-convert-toe.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://largest-renewable-zealand-mia.trycloudflare.com/auth/callback",
+  "https://largest-renewable-zealand-mia.trycloudflare.com/auth/shopify/callback",
+  "https://largest-renewable-zealand-mia.trycloudflare.com/api/auth/callback",
+  "https://largest-renewable-zealand-mia.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

@@ -35,23 +35,25 @@ export default function LinePlotEmailMetrics({
     ]
   }, [])
 
-  const x = d3.scaleTime(
-    d3.extent(data, d => d.date),
+  const x = d3.scaleUtc(
+    d3.extent(data, d => d.date) as unknown as [Date, Date],
     [marginLeft, width - marginRight])
 
   const y = d3.scaleLinear(
-    [0, d3.max(data, d => d.deliver)],
+    [0, 10] as unknown as [Number, Number],
     [height - marginBottom, marginTop])
 
-
+  const line = d3.line()
+    .x((d: any) => x(d.date))
+    .y((d: any) => y(d.clicked))
 
   return (
     <>
       <svg
         width={width}
         height={height}>
-        
-        {/* <path
+
+        <path
           fill="none"
           stroke="steelblue"
           strokeWidth="1.5"
@@ -61,11 +63,11 @@ export default function LinePlotEmailMetrics({
           stroke="currentColor"
           strokeWidth="1.5">
           {
-            data.map((d: any, i: any) => (
-              <circle key={i} cx={x(i)} cy={y(d)} r="2.5" />
+            data.map((d, i) => (
+              <circle key={i} cx={x(d.date)} cy={y(d.clicked)} r="2.5" />
             ))
           }
-        </g> */}
+        </g>
       </svg>
     </>
   )
