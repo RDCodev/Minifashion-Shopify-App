@@ -43,7 +43,7 @@ export default function Index() {
                 Deliver Emails
               </Text>
               <BlockStack inlineAlign="end">
-                <img src="https://cdn.shopify.com/s/files/1/0669/2811/5967/files/email.png?v=1703179240" width="70px" alt="" />
+                
               </BlockStack>
               <Text as="strong" variant="headingMd">
                 {total_deliver_emails}
@@ -61,7 +61,7 @@ export default function Index() {
                 Open Emails
               </Text>
               <BlockStack inlineAlign="end">
-                <img src="https://cdn.shopify.com/s/files/1/0669/2811/5967/files/open-email.png?v=1703179239" width="70px" alt="" />
+                
               </BlockStack>
               <Text as="strong" variant="headingMd">
                 {total_open_emails}
@@ -79,7 +79,7 @@ export default function Index() {
                 Clicked Emails
               </Text>
               <BlockStack inlineAlign="end">
-                <img src="https://cdn.shopify.com/s/files/1/0669/2811/5967/files/mail.png?v=1703179239" width="70px" alt="" />
+                
               </BlockStack>
               <Text as="strong" variant="headingMd">
                 {total_clicked_emails}
