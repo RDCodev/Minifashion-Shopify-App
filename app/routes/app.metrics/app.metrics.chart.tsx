@@ -171,7 +171,7 @@ export default function LinePlotEmailMetrics({
               d={lineDeliver(data)} />
 
             <path
-              fill="white"
+              fill="none"
               stroke={colorOpened}
               strokeWidth="1.5"
               d={lineOpened(data)} />

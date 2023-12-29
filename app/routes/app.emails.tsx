@@ -128,7 +128,7 @@ export default function EmailsPage() {
       </div>
       <Page
         backAction={{ content: 'Recommend', url: '/app/recommend' }}
-        title="Email Creator"
+        title="Email Deliver"
         primaryAction={{
           content: 'Send Emails',
           onAction: () => handleChange()

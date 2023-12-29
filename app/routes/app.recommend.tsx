@@ -1,12 +1,46 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { IndexTableProps } from "@shopify/polaris";
-import { Card, EmptySearchResult, Frame, IndexTable, Modal, Page, Text, TextContainer } from "@shopify/polaris";
-import { Fragment, useCallback, useState } from "react";
+import {
+  Badge,
+  Button,
+  EmptySearchResult,
+  IndexTable,
+  InlineStack,
+  LegacyCard,
+  Page,
+  useBreakpoints,
+  useIndexResourceState
+} from "@shopify/polaris";
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
 import { AWS_ENDPOINTS } from "~/utils/api.aws";
 import { SHOPIFY_APP_ID } from "~/utils/app.shopify";
 import { capatilize } from "~/utils/app.utils";
+import RecommendProducts from "./app.recommend/components/recommend.products";
+//import { retrieveCommonObjectByFields } from "./emails.builder/functions/emails.functions";
+
+function parseCustomerList(customers: any[]) {
+  return customers.reduce((arr, { products, customer_id, name, ...props }: any) => {
+
+    const common_products = [... new Set(products?.map((product: any) => {
+      return capatilize(product.type)
+    }))]
+
+    const favorite_vendors = [...new Set(products?.map((product: any) => {
+      return capatilize(product.vendor)
+    }))]
+
+    //const recommendations: any = retrieveCommonObjectByFields(products, 3, [...common_products, ...favorite_vendors])
+
+    return [...arr, {
+      id: customer_id,
+      customer: name,
+      ...props,
+      common_products,
+      favorite_vendors
+    }]
+  }, [])
+}
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 
@@ -14,26 +48,26 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const response = await fetch(api);
   const { customers }: CustomerList = await response.json();
 
-  return json({ customers });
+  return json({ customers: parseCustomerList(customers) });
 };
-
 
 export default function RecommendPage() {
 
-  const navigate = useNavigate();
-  const [active, setActive] = useState(false);
-  const handleChange = useCallback(() => setActive(!active), [active]);
+  //const navigate = useNavigate();
 
-  const { customers } = useLoaderData<typeof loader>()
-  const rows = customers || []
+  const { customers } = useLoaderData<typeof loader>() || []
 
   const columnHeadings = [
-    { title: 'Name' },
-    { title: 'Product' },
-    { title: 'Vendor' },
-    { title: 'Type' },
-    { title: 'Tags' },
+    { title: 'Customer' },
+    { title: 'Email' },
+    { title: 'Email subscription' },
+    { title: 'Favorite Vendor' },
+    { title: 'Common Products' },
   ];
+
+  const { selectedResources,
+    allResourcesSelected,
+    handleSelectionChange } = useIndexResourceState(customers)
 
   const emptyStateMarkup = (
     <EmptySearchResult
@@ -48,128 +82,82 @@ export default function RecommendPage() {
     plural: 'customers',
   };
 
-  const modalRecommend = () => {
-    return (
-      <div style={{ height: '0px' }}>
-        <Frame>
-          <Modal
-            open={active}
-            onClose={handleChange}
-            title="Products Recommendatons by Costumer"
-            primaryAction={{
-              content: 'Add Instagram',
-              onAction: handleChange,
-            }}
-            secondaryActions={[
-              {
-                content: 'Learn more',
-                onAction: handleChange,
-              },
-            ]}
-          >
-            <Modal.Section>
-              <TextContainer>
-                <p>
-                  Use Instagram posts to share your products with millions of
-                  people. Let shoppers buy from your store without leaving
-                  Instagram.
-                </p>
-              </TextContainer>
-            </Modal.Section>
-          </Modal>
-        </Frame>
-      </div>
+  const rowMarkup = customers.map(
+    ({
+      id,
+      customer,
+      email,
+      marketing_state,
+      favorite_vendors,
+      common_products
+    }: any, index: number) => (
+      <IndexTable.Row
+        id={id}
+        key={id}
+        selected={selectedResources.includes(id)}
+        position={index}
+      >
+        <IndexTable.Cell>
+          {customer}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          {email}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Badge tone={
+            marketing_state ? 'success' : 'info'
+          }>
+            {marketing_state ? 'Subscribe' : 'Not Subscribe'}
+          </Badge>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <InlineStack gap="050">
+            {
+              favorite_vendors.map((vendor: any) => (
+                <Badge key={vendor}>{vendor}</Badge>
+              ))
+            }
+          </InlineStack>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <InlineStack gap="050">
+            {
+              common_products.map((common: any) => (
+                <Badge key={common}>{common}</Badge>
+              ))
+            }
+          </InlineStack>
+        </IndexTable.Cell>
+      </IndexTable.Row>
     )
-  }
-
-  const rowMarkup = rows
-    .filter(customer => customer.products)
-    .map(({ name, products }: any, index) => {
-      return (
-        <Fragment key={index}>
-          <IndexTable.Row
-            rowType="subheader"
-            id={String(index)}
-            position={index}
-            disabled={true}
-          >
-            <IndexTable.Cell
-              colSpan={5}
-              scope="colgroup"
-              as="th"
-              id={String(index)}
-            >
-              {`${name}`}
-            </IndexTable.Cell>
-          </IndexTable.Row>
-          {products.map(
-            (
-              { product_id, vendor, title, type, tags }: any,
-              rowIndex: number,
-            ) => {
-
-              return (
-                <IndexTable.Row
-                  key={rowIndex}
-                  id={String(product_id)}
-                  position={rowIndex}>
-                  <IndexTable.Cell>
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>{capatilize(title)}</IndexTable.Cell>
-                  <IndexTable.Cell>
-                    <Text as="span">
-                      {capatilize(type)}
-                    </Text>
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    {capatilize(vendor)}
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    <Text as="span">
-                      {capatilize(tags)}
-                    </Text>
-                  </IndexTable.Cell>
-                </IndexTable.Row>
-              );
-            },
-          )}
-        </Fragment>
-      );
-    });
+  )
 
   return (
     <>
-      {modalRecommend()}
+      <RecommendProducts/>
       <Page
         fullWidth
-        title="Dashboard"
+        title="Customers Recommendations"
         subtitle="Recommend products to your customers"
-        actionGroups={[
-          {
-            title: 'Recommend',
-            actions: [
-              {
-                content: 'Products',
-                onAction: handleChange,
-              }, {
-                content: 'Promotions',
-                onAction: () => navigate('/app/emails'),
-              }
-            ],
-          }
-        ]}
+        primaryAction={
+          <Button variant="primary">Recommend</Button>
+        }
       >
-        <Card>
+        <LegacyCard>
           <IndexTable
-            selectable={false}
+            condensed={useBreakpoints().smDown}
             resourceName={resourceName}
             itemCount={customers.length}
+            selectedItemsCount={
+              allResourcesSelected ? 'All' : selectedResources.length
+            }
+            onSelectionChange={handleSelectionChange}
             emptyState={emptyStateMarkup}
             headings={columnHeadings as IndexTableProps['headings']}
           >
             {rowMarkup}
           </IndexTable>
-        </Card>
+        </LegacyCard>
       </Page>
     </>
   );
