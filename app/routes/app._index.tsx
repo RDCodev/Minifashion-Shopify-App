@@ -36,6 +36,11 @@ export default function Index() {
     <Page
     >
       <Layout>
+        <Layout.Section variant="fullWidth">
+          <Text variant="headingMd" as="h5">
+            Total Count
+          </Text>
+        </Layout.Section>
         <Layout.Section variant="oneThird">
           <Card>
             <BlockStack gap="100">
@@ -43,14 +48,16 @@ export default function Index() {
                 Deliver Emails
               </Text>
               <BlockStack inlineAlign="end">
-                
+
               </BlockStack>
               <Text as="strong" variant="headingMd">
-                {total_deliver_emails}
+                {total_deliver_emails ? total_deliver_emails : "-"}
               </Text>
-              <Text as="span">
-                Emails deliver rate
-              </Text>
+              <BlockStack inlineAlign="end">
+                <Text as="span">
+                  Emails deliver rate
+                </Text>
+              </BlockStack>
             </BlockStack>
           </Card>
         </Layout.Section>
@@ -61,14 +68,16 @@ export default function Index() {
                 Open Emails
               </Text>
               <BlockStack inlineAlign="end">
-                
+
               </BlockStack>
               <Text as="strong" variant="headingMd">
-                {total_open_emails}
+                {total_open_emails ? total_open_emails: "-"}
               </Text>
-              <Text as="span">
-                Emails open rate
-              </Text>
+              <BlockStack inlineAlign="end">
+                <Text as="span">
+                  Emails open rate
+                </Text>
+              </BlockStack>
             </BlockStack>
           </Card>
         </Layout.Section>
@@ -79,23 +88,27 @@ export default function Index() {
                 Clicked Emails
               </Text>
               <BlockStack inlineAlign="end">
-                
+
               </BlockStack>
               <Text as="strong" variant="headingMd">
-                {total_clicked_emails}
+                {total_clicked_emails? total_clicked_emails : "-"}
               </Text>
-              <Text as="span">
-                Emails clicked rate
-              </Text>
+              <BlockStack inlineAlign="end">
+                <Text as="span">
+                  Emails clicked rate
+                </Text>
+              </BlockStack>
             </BlockStack>
           </Card>
         </Layout.Section>
         <Layout.Section variant="fullWidth">
-          <Text as="h2">
+          <Text variant="headingMd" as="h5">
             Metrics
           </Text>
+        </Layout.Section>
+        <Layout.Section variant="fullWidth">
           <Card>
-            <LinePlotEmailMetrics 
+            <LinePlotEmailMetrics
               dataset={emails_metrics_dataset}
             />
           </Card>

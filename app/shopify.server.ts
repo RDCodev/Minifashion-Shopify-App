@@ -43,6 +43,14 @@ const shopify = shopifyApp({
     CUSTOMERS_CREATE: {
       deliveryMethod: DeliveryMethod.EventBridge,
       arn: process.env.AWS_ARN_SOURCE_EVENT || ""
+    },
+    CUSTOMERS_UPDATE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
+    },
+    CUSTOMERS_DELETE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
     }
   },
   hooks: {
