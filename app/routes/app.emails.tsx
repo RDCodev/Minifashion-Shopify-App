@@ -10,47 +10,14 @@ import { useCallback, useState } from "react";
 import { type ActionFunctionArgs, json, type LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "~/shopify.server";
 import { AWS_ENDPOINTS } from "~/utils/api.aws";
-import { SHOPIFY_APP_ID } from "~/utils/app.shopify";
+import { QueriesContexts, SHOPIFY_APP_ID, grahpqlQueries } from "~/utils/app.shopify";
 import { useLoaderData } from "@remix-run/react";
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
 import EmailsCustomers from "./emails.builder/components/emails.customers";
 import EmailsProducts from "./emails.builder/components/emails.products";
 import EmailsBuilder from "./emails.builder/components/emails.builder";
 
-const enum QueriesContexts {
-  PRODUCTS = 'products',
-  CUSTOMERS = 'customers'
-}
 
-const grahpqlQueries = [
-  {
-    context: 'products',
-    action: 'retrive',
-    query: (limit: number) => `
-      query {
-        products(first: ${limit}) {
-          edges {
-            node {
-              id
-              title
-              vendor
-              productType
-              tags
-              featuredImage {
-                url
-              }
-              priceRangeV2 {
-                maxVariantPrice {
-                  amount
-                }
-              }
-            }
-          }
-        }
-      }
-    `
-  }
-]
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);

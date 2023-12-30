@@ -5,32 +5,32 @@ import {
   Badge,
   Button,
   EmptySearchResult,
+  Frame,
   IndexTable,
   InlineStack,
   LegacyCard,
+  Modal,
   Page,
-  useBreakpoints,
   useIndexResourceState
 } from "@shopify/polaris";
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
 import { AWS_ENDPOINTS } from "~/utils/api.aws";
-import { SHOPIFY_APP_ID } from "~/utils/app.shopify";
+import { grahpqlQueries, QueriesContexts, SHOPIFY_APP_ID } from "~/utils/app.shopify";
 import { capatilize } from "~/utils/app.utils";
 import RecommendProducts from "./app.recommend/components/recommend.products";
-//import { retrieveCommonObjectByFields } from "./emails.builder/functions/emails.functions";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { authenticate } from "~/shopify.server";
 
 function parseCustomerList(customers: any[]) {
   return customers.reduce((arr, { products, customer_id, name, ...props }: any) => {
 
     const common_products = [... new Set(products?.map((product: any) => {
-      return capatilize(product.type)
+      return product.type
     }))]
 
     const favorite_vendors = [...new Set(products?.map((product: any) => {
-      return capatilize(product.vendor)
+      return product.vendor
     }))]
-
-    //const recommendations: any = retrieveCommonObjectByFields(products, 3, [...common_products, ...favorite_vendors])
 
     return [...arr, {
       id: customer_id,
@@ -43,20 +43,28 @@ function parseCustomerList(customers: any[]) {
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { admin } = await authenticate.admin(request);
+
+  const queryFilter = (query: any) => query.context === QueriesContexts.PRODUCTS
+  const respQLResponse = await admin.graphql(grahpqlQueries.filter(queryFilter)[0].query(100))
+
+  const { data: { products: { edges: savedProducts } } } = await respQLResponse.json()
 
   const api = AWS_ENDPOINTS.customersList(SHOPIFY_APP_ID);
   const response = await fetch(api);
   const { customers }: CustomerList = await response.json();
 
-  return json({ customers: parseCustomerList(customers) });
+  return json({ customers: parseCustomerList(customers), savedProducts });
 };
 
 export default function RecommendPage() {
 
-  //const navigate = useNavigate();
+  const { customers, savedProducts } = useLoaderData<typeof loader>() || []
 
-  const { customers } = useLoaderData<typeof loader>() || []
+  const [activate, setActivate] = useState(false)
+  const [recommendCustomers, setRecommendCustomers] = useState<any[]>([])
 
+  const buttonRef: any = useRef()
   const columnHeadings = [
     { title: 'Customer' },
     { title: 'Email' },
@@ -81,6 +89,27 @@ export default function RecommendPage() {
     singular: 'customer',
     plural: 'customers',
   };
+
+  const toggleModal = useCallback(() => {
+    setActivate(!activate)
+  }, [activate])
+
+  const updateCustomers = useCallback((selections: any[]) => {
+    const customersRecommendations = selections.reduce((arr: any[], selection: any) => {
+
+      const [customerFilter] = customers.filter((customer: any) => customer.id == selection)
+
+      return [...arr, customerFilter]
+    }, [])
+
+    setRecommendCustomers([...customersRecommendations])
+  }, [customers])
+
+  useEffect(() => {
+    updateCustomers(selectedResources)
+  }, [selectedResources, updateCustomers])
+
+
 
   const rowMarkup = customers.map(
     ({
@@ -114,7 +143,7 @@ export default function RecommendPage() {
           <InlineStack gap="050">
             {
               favorite_vendors.map((vendor: any) => (
-                <Badge key={vendor}>{vendor}</Badge>
+                <Badge key={vendor}>{capatilize(vendor)}</Badge>
               ))
             }
           </InlineStack>
@@ -123,7 +152,7 @@ export default function RecommendPage() {
           <InlineStack gap="050">
             {
               common_products.map((common: any) => (
-                <Badge key={common}>{common}</Badge>
+                <Badge key={common}>{capatilize(common)}</Badge>
               ))
             }
           </InlineStack>
@@ -132,20 +161,44 @@ export default function RecommendPage() {
     )
   )
 
+  const modalRecommendation = () => (
+    <div style={{
+      height: "0px"
+    }}>
+      <Frame>
+        <Modal
+          activator={buttonRef}
+          open={activate}
+          onClose={toggleModal}
+          title="Recommendations"
+        >
+          <Modal.Section>
+            <RecommendProducts
+              customers={recommendCustomers}
+              products={savedProducts}
+            />
+          </Modal.Section>
+        </Modal>
+      </Frame>
+    </div>
+  )
+
   return (
     <>
-      <RecommendProducts/>
+      {modalRecommendation()}
       <Page
         fullWidth
         title="Customers Recommendations"
         subtitle="Recommend products to your customers"
         primaryAction={
-          <Button variant="primary">Recommend</Button>
+          <div ref={buttonRef}>
+            <Button variant="primary" onClick={toggleModal}>Recommend</Button>
+          </div>
         }
       >
         <LegacyCard>
           <IndexTable
-            condensed={useBreakpoints().smDown}
+            
             resourceName={resourceName}
             itemCount={customers.length}
             selectedItemsCount={

@@ -8,13 +8,13 @@ import {
   BlockStack,
   Form,
   Text,
+  Divider,
 } from "@shopify/polaris"
 import { forwardRef, useCallback, useState } from "react"
 import { AWS_ENDPOINTS, emailTemplateConfig } from "~/utils/api.aws"
+import { dotReplace } from "~/utils/app.utils"
 
 const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend }: { emails: any, offerProducts: any[], wrapperState: any, onSend: any }, ref) => {
-
-  //const deliverEmails = useFetcher()
 
   const [deliver, setDeliver] = useState(false)
   const [template, setTemplate] = useState({ ...emailTemplateConfig })
@@ -27,7 +27,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
   const handleBodyChange = useCallback((body: any) => setBody(body), [])
 
   const tagMarkup = offerProducts.map(({ id, value }) => (
-    <Tag key={id}>{value}</Tag>
+    <Tag key={id}>{dotReplace(value, 20)}</Tag>
   ))
 
   const calculateDiscountProduct = (discount: number, productPrice: number) => {
@@ -37,7 +37,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
     return (productPrice - (productPrice * (discount / 100))).toFixed(2)
   }
 
-  const handleSubmit = useCallback( async (event: any) => {
+  const handleSubmit = useCallback(async (event: any) => {
 
     const TemplateData: any = {
       name: emails.name,
@@ -87,13 +87,6 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
       wrapperState(false)
     }
 
-    /* deliverEmails.submit({
-      templateDeliver
-    },{
-      method: 'POST',
-      action: 'apps/aws/emails'
-    }) */
-
   }, [emails.name, emails.email, collection, discount, body, offerProducts, template, onSend, wrapperState])
 
 
@@ -108,6 +101,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
             <InlineStack gap="200">
               {tagMarkup}
             </InlineStack>
+            <Divider />
             <TextField
               label="Collection Name"
               name="collection"

@@ -3,7 +3,6 @@ import {
   Card,
   useIndexResourceState,
   IndexTable,
-  useBreakpoints,
   EmptySearchResult
 } from "@shopify/polaris";
 import { useMemo } from "react";
@@ -60,7 +59,6 @@ export default function EmailsProducts({ recommendations, wrapperState }: any) {
       </Text>
       <Card>
         <IndexTable
-          condensed={useBreakpoints().smDown}
           resourceName={resourceName}
           itemCount={recommendations.length}
           selectedItemsCount={
