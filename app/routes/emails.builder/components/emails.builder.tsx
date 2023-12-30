@@ -12,6 +12,7 @@ import {
 } from "@shopify/polaris"
 import { forwardRef, useCallback, useState } from "react"
 import { AWS_ENDPOINTS, emailTemplateConfig } from "~/utils/api.aws"
+import { calculateDiscountProduct } from "~/utils/app.shopify"
 import { dotReplace } from "~/utils/app.utils"
 
 const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend }: { emails: any, offerProducts: any[], wrapperState: any, onSend: any }, ref) => {
@@ -30,12 +31,7 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
     <Tag key={id}>{dotReplace(value, 20)}</Tag>
   ))
 
-  const calculateDiscountProduct = (discount: number, productPrice: number) => {
 
-    if (!discount) throw new Error(`Discount can't be zero, please change the amount.`)
-
-    return (productPrice - (productPrice * (discount / 100))).toFixed(2)
-  }
 
   const handleSubmit = useCallback(async (event: any) => {
 

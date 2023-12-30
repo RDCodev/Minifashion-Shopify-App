@@ -3,6 +3,8 @@ import { useLoaderData } from "@remix-run/react";
 import type { IndexTableProps } from "@shopify/polaris";
 import {
   Badge,
+  Banner,
+  BlockStack,
   Button,
   EmptySearchResult,
   Frame,
@@ -11,6 +13,7 @@ import {
   LegacyCard,
   Modal,
   Page,
+  Toast,
   useIndexResourceState
 } from "@shopify/polaris";
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
@@ -62,6 +65,8 @@ export default function RecommendPage() {
   const { customers, savedProducts } = useLoaderData<typeof loader>() || []
 
   const [activate, setActivate] = useState(false)
+  const [deliver, setDeliver] = useState(false)
+  const [deliverError, setDeliverError] = useState(false)
   const [recommendCustomers, setRecommendCustomers] = useState<any[]>([])
 
   const buttonRef: any = useRef()
@@ -94,6 +99,14 @@ export default function RecommendPage() {
     setActivate(!activate)
   }, [activate])
 
+  const toggleDeliver = useCallback((state: boolean) => {
+    setDeliver(state)
+  }, [])
+
+  const toggleDeliverError = useCallback((state: boolean) => {
+    setDeliverError(state)
+  }, [])
+
   const updateCustomers = useCallback((selections: any[]) => {
     const customersRecommendations = selections.reduce((arr: any[], selection: any) => {
 
@@ -108,8 +121,6 @@ export default function RecommendPage() {
   useEffect(() => {
     updateCustomers(selectedResources)
   }, [selectedResources, updateCustomers])
-
-
 
   const rowMarkup = customers.map(
     ({
@@ -176,9 +187,29 @@ export default function RecommendPage() {
             <RecommendProducts
               customers={recommendCustomers}
               products={savedProducts}
+              onComplete={toggleDeliver}
+              onError={toggleDeliverError}
+              wrapperModal={toggleModal}
             />
           </Modal.Section>
         </Modal>
+      </Frame>
+    </div>
+  )
+
+  const toastDelivering = () => (
+    <div style={{ height: '0px' }}>
+      <Frame>
+        {
+          deliver ? (
+            <Toast content="Delivering ..." onDismiss={() => {setDeliver(false)}} duration={3000}/>
+          ) : null          
+        }
+        {
+          deliverError ? (
+            <Toast content="Deliver Error" error onDismiss={() => {setDeliverError(false)}} duration={3000}/>
+          ) : null
+        }
       </Frame>
     </div>
   )
@@ -196,22 +227,32 @@ export default function RecommendPage() {
           </div>
         }
       >
-        <LegacyCard>
-          <IndexTable
-            
-            resourceName={resourceName}
-            itemCount={customers.length}
-            selectedItemsCount={
-              allResourcesSelected ? 'All' : selectedResources.length
-            }
-            onSelectionChange={handleSelectionChange}
-            emptyState={emptyStateMarkup}
-            headings={columnHeadings as IndexTableProps['headings']}
+        <BlockStack gap="200">
+          <Banner
+            title="Becarefull while delivering recommendation are in progress."
+            tone="warning"
           >
-            {rowMarkup}
-          </IndexTable>
-        </LegacyCard>
+            <p>Please don't change to another tab or page while delivering recommendation to yours customers.</p>
+          </Banner>
+
+          <LegacyCard>
+            <IndexTable
+
+              resourceName={resourceName}
+              itemCount={customers.length}
+              selectedItemsCount={
+                allResourcesSelected ? 'All' : selectedResources.length
+              }
+              onSelectionChange={handleSelectionChange}
+              emptyState={emptyStateMarkup}
+              headings={columnHeadings as IndexTableProps['headings']}
+            >
+              {rowMarkup}
+            </IndexTable>
+          </LegacyCard>
+        </BlockStack>
       </Page>
+      {toastDelivering()}
     </>
   );
 }

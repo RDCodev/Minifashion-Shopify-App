@@ -33,3 +33,10 @@ export const grahpqlQueries = [
     `
   }
 ]
+
+export const calculateDiscountProduct = (discount: number, productPrice: number) => {
+
+  if (!discount) throw new Error(`Discount can't be zero, please change the amount.`)
+
+  return (productPrice - (productPrice * (discount / 100))).toFixed(2)
+}
