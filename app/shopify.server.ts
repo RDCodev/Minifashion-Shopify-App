@@ -36,6 +36,10 @@ const shopify = shopifyApp({
       deliveryMethod: DeliveryMethod.EventBridge,
       arn: process.env.AWS_ARN_SOURCE_EVENT || ""
     },
+    PRODUCTS_UPDATE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
+    },
     ORDERS_CREATE: {
       deliveryMethod: DeliveryMethod.EventBridge,
       arn: process.env.AWS_ARN_SOURCE_EVENT || ""
@@ -51,7 +55,11 @@ const shopify = shopifyApp({
     CUSTOMERS_DELETE: {
       deliveryMethod: DeliveryMethod.EventBridge,
       arn: process.env.AWS_ARN_SOURCE_EVENT || ""
-    }
+    },
+    CUSTOMERS_EMAIL_MARKETING_CONSENT_UPDATE: {
+      deliveryMethod: DeliveryMethod.EventBridge,
+      arn: process.env.AWS_ARN_SOURCE_EVENT || ""
+    },
   },
   hooks: {
     afterAuth: async ({ session }) => {

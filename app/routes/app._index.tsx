@@ -132,7 +132,7 @@ export default function Index() {
         <Layout.Section variant="fullWidth">
           <Card>
             <LinePlotEmailMetrics
-              dataset={emails_metrics_dataset}
+              dataset={emails_metrics_dataset || []}
             />
           </Card>
         </Layout.Section>

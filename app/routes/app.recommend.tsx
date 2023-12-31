@@ -57,7 +57,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const response = await fetch(api);
   const { customers }: CustomerList = await response.json();
 
-  return json({ customers: parseCustomerList(customers), savedProducts });
+  return json({ customers: parseCustomerList(customers || []), savedProducts });
 };
 
 export default function RecommendPage() {

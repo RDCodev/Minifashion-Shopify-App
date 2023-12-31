@@ -17,8 +17,6 @@ import EmailsCustomers from "./emails.builder/components/emails.customers";
 import EmailsProducts from "./emails.builder/components/emails.products";
 import EmailsBuilder from "./emails.builder/components/emails.builder";
 
-
-
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
 
@@ -31,7 +29,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const response = await fetch(api)
   const { customers }: CustomerList = await response.json()
 
-  return json({ customers, savedProducts })
+  return json({ customers: customers || [], savedProducts })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
