@@ -1,5 +1,5 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import type { IndexTableProps } from "@shopify/polaris";
 import {
   Badge,
@@ -19,10 +19,12 @@ import {
 import type { CustomerList } from "~/interfaces/api.aws.interfaces";
 import { AWS_ENDPOINTS } from "~/utils/api.aws";
 import { grahpqlQueries, QueriesContexts, SHOPIFY_APP_ID } from "~/utils/app.shopify";
-import { capatilize } from "~/utils/app.utils";
+import { capatilize, chuckArray, flat } from "~/utils/app.utils";
 import RecommendProducts from "./app.recommend/components/recommend.products";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authenticate } from "~/shopify.server";
+import { nanoid } from "nanoid";
+import type { AdminApiContext } from "node_modules/@shopify/shopify-app-remix/build/ts/server/clients";
 
 function parseCustomerList(customers: any[]) {
   return customers.reduce((arr, { products, customer_id, name, ...props }: any) => {
@@ -45,6 +47,101 @@ function parseCustomerList(customers: any[]) {
   }, [])
 }
 
+const parseFormDataToObject = (form: any, out: any = {}) => {
+  form.forEach(function (value: any, key: any) {
+    out[key] = value;
+  });
+
+  return out;
+}
+
+const requestDiscountCode = async (admin: AdminApiContext, templates: any) => {
+  
+  return Promise.all(templates.map( async (template: any) => {
+    const response = await admin.graphql(
+      `
+      #graphql
+        mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
+          discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
+            codeDiscountNode {
+              codeDiscount {
+                ... on DiscountCodeBasic {
+                  title
+                  codes(first: 10) {
+                    nodes {
+                      code
+                    }
+                  }
+                  startsAt
+                  endsAt
+                  customerSelection {
+                    ... on DiscountCustomers {
+                      customers {
+                        id
+                      }
+                    }
+                  }
+                  customerGets {
+                    value {
+                      ... on DiscountPercentage {
+                        percentage
+                      }
+                    }
+                    items {
+                      ... on DiscountProducts {
+                        products(first: 100) {
+                          nodes {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }
+                  appliesOncePerCustomer
+                }
+              }
+            }
+            userErrors {
+              field
+              code
+              message
+            }
+          }
+        }
+      `, {
+      variables: {
+        basicCodeDiscount: {
+          title: `${template.title}`,
+          code: `${nanoid(20)}`,
+          startsAt: `${new Date(Number(template.startsAt)).toISOString()}`,
+          endsAt: `${new Date(Number(template.endsAt)).toISOString()}`,
+          customerSelection: {
+            customers: {
+              add: template.customers
+            }
+          },
+          customerGets: {
+            value: {
+              percentage: parseFloat(template.percentage)
+            },
+            items: {
+              products: {
+                productsToAdd: template.products
+              }
+            }
+          },
+          "appliesOncePerCustomer": true
+        }
+      }
+    })
+  
+    const responseJson = await response.json();
+    const { code } = flat(responseJson, {})
+
+    return code
+  }))
+}
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
 
@@ -60,10 +157,39 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ customers: parseCustomerList(customers || []), savedProducts });
 };
 
+export async function action({ request }: ActionFunctionArgs) {
+  const { admin } = await authenticate.admin(request)
+
+  const formData = await request.formData();
+
+  const objectData: any = parseFormDataToObject(formData)
+
+  const templates = chuckArray(objectData.products.split(","), 3)
+    .reduce((arr: any, val: any, index: number) => {
+
+      const template = {
+        ...objectData,
+        customers: objectData.customers.split(",")[index],
+        products: val
+      }
+
+      return [...arr, template]
+    }, [])
+
+  const codes = await requestDiscountCode(admin, templates)
+
+  return { codes }
+}
+
 export default function RecommendPage() {
 
   const { customers, savedProducts } = useLoaderData<typeof loader>() || []
+  const submit = useSubmit()
+  const actionData = useActionData<typeof action>();
 
+  const code = actionData?.codes
+
+  const [codes, setCodes] = useState<any[]>([])
   const [activate, setActivate] = useState(false)
   const [deliver, setDeliver] = useState(false)
   const [deliverError, setDeliverError] = useState(false)
@@ -107,6 +233,10 @@ export default function RecommendPage() {
     setDeliverError(state)
   }, [])
 
+  const handleSubmit = useCallback((data: any) => submit(data, {
+    method: 'POST',
+  }), [submit])
+
   const updateCustomers = useCallback((selections: any[]) => {
     const customersRecommendations = selections.reduce((arr: any[], selection: any) => {
 
@@ -117,6 +247,10 @@ export default function RecommendPage() {
 
     setRecommendCustomers([...customersRecommendations])
   }, [customers])
+
+  useEffect(() => {
+    if (code) setCodes([...codes, ...code])
+  }, [code, actionData])
 
   useEffect(() => {
     updateCustomers(selectedResources)
@@ -190,6 +324,8 @@ export default function RecommendPage() {
               onComplete={toggleDeliver}
               onError={toggleDeliverError}
               wrapperModal={toggleModal}
+              wrapperSubmit={handleSubmit}
+              codes={codes}
             />
           </Modal.Section>
         </Modal>
@@ -202,12 +338,12 @@ export default function RecommendPage() {
       <Frame>
         {
           deliver ? (
-            <Toast content="Delivering ..." onDismiss={() => {setDeliver(false)}} duration={3000}/>
-          ) : null          
+            <Toast content="Delivering ..." onDismiss={() => { setDeliver(false) }} duration={3000} />
+          ) : null
         }
         {
           deliverError ? (
-            <Toast content="Deliver Error" error onDismiss={() => {setDeliverError(false)}} duration={3000}/>
+            <Toast content="Deliver Error" error onDismiss={() => { setDeliverError(false) }} duration={3000} />
           ) : null
         }
       </Frame>
@@ -237,7 +373,6 @@ export default function RecommendPage() {
 
           <LegacyCard>
             <IndexTable
-
               resourceName={resourceName}
               itemCount={customers.length}
               selectedItemsCount={

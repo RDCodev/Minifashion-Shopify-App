@@ -3,10 +3,72 @@ import { useCallback, useEffect, useState } from "react";
 import { retrieveCommonObjectByFields } from "~/routes/emails.builder/functions/emails.functions";
 import { AWS_ENDPOINTS, emailTemplateConfig } from "~/utils/api.aws";
 import { calculateDiscountProduct } from "~/utils/app.shopify";
-import { dotReplace } from "~/utils/app.utils";
+import { addHours, dotReplace } from "~/utils/app.utils";
 
+const parseTemplateEmailCustomers = (customers: any, collection: any, discount: any, body: any, customerProductsRecommend: any, codes: any) => {
+  return customers.reduce((arr: any[], {
+    customer,
+    email
+  }: any, index: number) => {
 
-export default function RecommendProducts({ customers, products, onComplete, onError, wrapperModal }: any) {
+    const TemplateData = {
+      name: customer,
+      collection,
+      discount,
+      body,
+      discount_code: codes[index],
+      products: customerProductsRecommend[index].reduce((arr: any[], { value, price, url }: any, index: number) => {
+        const productOffer = {
+          title_product: value,
+          previous_price_product: price,
+          current_price_product: calculateDiscountProduct(Number(discount), Number(price)),
+          product_image_url: url.url
+        }
+
+        return [...arr, productOffer]
+      }, []),
+    }
+
+    const Destination = {
+      ToAddresses: [
+        email
+      ]
+    }
+
+    return [...arr, {
+      ...emailTemplateConfig,
+      TemplateData,
+      Destination
+    }]
+  }, [])
+}
+
+const parseSubmitDiscount = (collection: any, percentage: any, customers: any, products: any) => {
+
+  const today = new Date()
+
+  const customerGID = customers.reduce((arr: any, customer: any) => {
+    return [...arr, `gid://shopify/Customer/${customer.id}`]
+  },[])
+
+  const productsGID = products.flat(Infinity).reduce((arr: any, product: any) => {
+    return [...arr, `gid://shopify/Product/${product.id}`]
+  }, [])
+
+  const template = {
+    title: collection,
+    code: "",
+    startsAt: addHours(today, 0),
+    endsAt: addHours(today, 1),
+    customers: customerGID,
+    percentage: (percentage / 100).toFixed(2),
+    products: productsGID
+  }
+
+  return template
+}
+
+export default function RecommendProducts({ customers, products, onComplete, onError, wrapperModal, wrapperSubmit, codes }: any) {
 
   const [body, setBody] = useState("")
   const [collection, setCollection] = useState("")
@@ -68,44 +130,24 @@ export default function RecommendProducts({ customers, products, onComplete, onE
   )
 
   useEffect(() => {
+    handleSubmit(codes)
+  }, [codes])
+
+  useEffect(() => {
     customerProducts(customers)
   }, [customerProducts, customers])
 
-  const handleSubmit = useCallback(async () => {
-    const emailsToDeliver = customers.reduce((arr: any[], {
-      customer,
-      email
-    }: any, index: number) => {
+  const handleSubmitDiscountCode = useCallback(() => {
+    const templateDiscount: any = parseSubmitDiscount(collection, discount, customers, customerProductsRecommend)
+    wrapperSubmit(templateDiscount)
 
-      const TemplateData = {
-        name: customer,
-        collection,
-        discount,
-        body,
-        products: customerProductsRecommend[index].reduce((arr: any[], { value, price, url }: any) => {
-          const productOffer = {
-            title_product: value,
-            previous_price_product: price,
-            current_price_product: calculateDiscountProduct(Number(discount), Number(price)),
-            product_image_url: url.url
-          }
+  }, [collection, customerProductsRecommend, customers, discount, wrapperSubmit])
 
-          return [...arr, productOffer]
-        }, []),
-      }
+  const handleSubmit = useCallback(async (codes: any) => {
 
-      const Destination = {
-        ToAddresses: [
-          email
-        ]
-      }
+    if(!codes) return
 
-      return [...arr, {
-        ...emailTemplateConfig,
-        TemplateData,
-        Destination
-      }]
-    }, [])
+    const emailsToDeliver = parseTemplateEmailCustomers(customers, collection, discount, body, customerProductsRecommend, codes)
 
     try {
       onComplete(true)
@@ -127,11 +169,11 @@ export default function RecommendProducts({ customers, products, onComplete, onE
       onComplete(false)
     }
 
-  }, [body, collection, customerProductsRecommend, customers, discount, onComplete, onError, wrapperModal])
+  }, [body, collection, customers, discount])
 
   return (
     <>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmitDiscountCode}>
         <FormLayout>
           <BlockStack gap="200">
             <InlineStack gap="200">

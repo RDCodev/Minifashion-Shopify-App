@@ -10,12 +10,78 @@ import {
   Text,
   Divider,
 } from "@shopify/polaris"
-import { forwardRef, useCallback, useState } from "react"
+import { forwardRef, useCallback, useEffect, useState } from "react"
 import { AWS_ENDPOINTS, emailTemplateConfig } from "~/utils/api.aws"
 import { calculateDiscountProduct } from "~/utils/app.shopify"
-import { dotReplace } from "~/utils/app.utils"
+import { addHours, dotReplace } from "~/utils/app.utils"
 
-const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend }: { emails: any, offerProducts: any[], wrapperState: any, onSend: any }, ref) => {
+interface EmailBuilderProps {
+  emails: any,
+  offerProducts: any[],
+  wrapperState: any,
+  onSend: any,
+  discountCode: any
+  wrapperSubmit?: any
+}
+
+const parseTemplateEmailData = (emails: any, collection: any, discount: any, body: any, offerProducts: any, template: any, code: any) => {
+
+  const TemplateData: any = {
+    name: emails.name,
+    collection,
+    discount,
+    body,
+    discount_code: code,
+    products: offerProducts.reduce((arr: any[], { value, price, url }: any) => {
+
+      const productOffer = {
+        title_product: value,
+        previous_price_product: price,
+        current_price_product: calculateDiscountProduct(Number(discount), Number(price)),
+        product_image_url: url.url
+      }
+
+      return [...arr, productOffer]
+    }, [])
+  }
+
+  const Destination = {
+    ToAddresses: [
+      emails.email
+    ]
+  }
+
+  const templateDeliver = {
+    ...template,
+    TemplateData,
+    Destination
+  }
+
+  return templateDeliver
+}
+
+const parseSubmitDiscount = (collection: any, percentage: any, customer: any, products: any) => {
+
+  const today = new Date()
+
+  const productsId = products.reduce((arr: any, product: any) => {
+    return [...arr, product.id]
+  }, [])
+  
+  const basicCode = {
+    title: collection,
+    code: "",
+    startsAt: addHours(today, 0),
+    endsAt: addHours(today, 1),
+    customers: customer.id,
+    percentage: (percentage / 100).toFixed(2),
+    products: productsId
+  }
+
+  return basicCode
+}
+
+const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend, discountCode, wrapperSubmit }: EmailBuilderProps , ref) => {
 
   const [deliver, setDeliver] = useState(false)
   const [template, setTemplate] = useState({ ...emailTemplateConfig })
@@ -27,44 +93,12 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
   const handleDiscountChange = useCallback((discount: any) => setDiscount(discount), [])
   const handleBodyChange = useCallback((body: any) => setBody(body), [])
 
-  const tagMarkup = offerProducts.map(({ id, value }) => (
-    <Tag key={id}>{dotReplace(value, 20)}</Tag>
-  ))
+  const handleSubmit = useCallback(async (code: any) => {
 
+    if(!code) return
 
-
-  const handleSubmit = useCallback(async (event: any) => {
-
-    const TemplateData: any = {
-      name: emails.name,
-      collection,
-      discount,
-      body,
-      products: offerProducts.reduce((arr: any[], { value, price, url }: any) => {
-
-        const productOffer = {
-          title_product: value,
-          previous_price_product: price,
-          current_price_product: calculateDiscountProduct(Number(discount), Number(price)),
-          product_image_url: url.url
-        }
-
-        return [...arr, productOffer]
-      }, [])
-    }
-
-    const Destination = {
-      ToAddresses: [
-        emails.email
-      ]
-    }
-
-    const templateDeliver = {
-      ...template,
-      TemplateData,
-      Destination
-    }
-
+    const templateDeliver = parseTemplateEmailData(emails, collection, discount, body, offerProducts, template, code)
+    
     setTemplate(templateDeliver)
     setDeliver(true)
 
@@ -83,12 +117,24 @@ const EmailsBuilder = forwardRef(({ emails, offerProducts, wrapperState, onSend 
       wrapperState(false)
     }
 
-  }, [emails.name, emails.email, collection, discount, body, offerProducts, template, onSend, wrapperState])
+  }, [emails, collection, discount, body, offerProducts, template, onSend, wrapperState])
 
+  useEffect(() => {
+    handleSubmit(discountCode)
+  }, [discountCode])
+
+  const handleSubmitDiscountCode = useCallback(() => {
+    const templateDiscount = parseSubmitDiscount(collection, discount, emails, offerProducts)
+    wrapperSubmit(templateDiscount)
+  }, [collection, discount, emails, offerProducts, wrapperSubmit])
+
+  const tagMarkup = offerProducts.map(({ id, value }) => (
+    <Tag key={id}>{dotReplace(value, 20)}</Tag>
+  ))
 
   return (
     <>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmitDiscountCode}>
         <FormLayout>
           <BlockStack gap="300">
             <Text as="h3" variant="headingSm">

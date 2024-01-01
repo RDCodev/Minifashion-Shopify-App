@@ -2,7 +2,7 @@
 
 name = "Recommend Me!"
 client_id = "f8bdf8ae3030c5594f19af505674433b"
-application_url = "https://screenshots-maintains-promote-cj.trycloudflare.com"
+application_url = "https://reservoir-immediately-snow-understanding.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "read_customers,read_inventory,read_orders,read_products,read_all_order
 
 [auth]
 redirect_urls = [
-  "https://screenshots-maintains-promote-cj.trycloudflare.com/auth/callback",
-  "https://screenshots-maintains-promote-cj.trycloudflare.com/auth/shopify/callback",
-  "https://screenshots-maintains-promote-cj.trycloudflare.com/api/auth/callback",
-  "https://screenshots-maintains-promote-cj.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://reservoir-immediately-snow-understanding.trycloudflare.com/auth/callback",
+  "https://reservoir-immediately-snow-understanding.trycloudflare.com/auth/shopify/callback",
+  "https://reservoir-immediately-snow-understanding.trycloudflare.com/api/auth/callback",
+  "https://reservoir-immediately-snow-understanding.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

@@ -39,6 +39,7 @@ export default function EmailsCustomers({ customers, products, wrapperState, wra
     }))]
 
     const customerDeliverEmail = {
+      id: props.customer_id,
       name: props.name,
       email: props.email,
       isMarketing: props.marketing_state
